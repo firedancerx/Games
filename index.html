@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Permainan Pintar Kanak-Kanak | KidGames Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --math-color: #F59E0B;
+      --math-bg: #FEF3C7;
+      --ask-color: #06B6D4;
+      --ask-bg: #CFFAFE;
+      --science-color: #10B981;
+      --science-bg: #D1FAE5;
+      --bm-color: #EF4444;
+      --bm-bg: #FEE2E2;
+      --bi-color: #8B5CF6;
+      --bi-bg: #EDE9FE;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.07), 0 4px 10px -4px rgba(0, 0, 0, 0.04);
+      --card-shadow-hover: 0 20px 35px -8px rgba(0, 0, 0, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #F0F9FF 0%, #FFF7ED 50%, #FAF5FF 100%);
+      min-height: 100vh;
+      color: #1E293B;
+      padding-bottom: 60px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient background bubbles */
+    .bg-bubble {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      z-index: 0;
+      opacity: 0.45;
+      pointer-events: none;
+      animation: floatBubble 12s infinite alternate ease-in-out;
+    }
+    .b1 { width: 340px; height: 340px; background: #FED7AA; top: -60px; left: -80px; }
+    .b2 { width: 380px; height: 380px; background: #BAE6FD; top: 30%; right: -100px; animation-duration: 15s; }
+    .b3 { width: 320px; height: 320px; background: #DDD6FE; bottom: 80px; left: 5%; animation-duration: 9s; }
+    @keyframes floatBubble { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
+
+    .container { max-width: 1140px; margin: 0 auto; padding: 20px 16px; position: relative; z-index: 2; }
+
+    /* Top User Bar */
+    .user-profile-bar {
+      background: white;
+      border: 2px solid #E2E8F0;
+      border-radius: 20px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .u-avatar {
+      font-size: 2rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .u-name { font-weight: 800; font-size: 1.15rem; color: #0F172A; }
+    .u-id { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #64748B; background: #F1F5F9; padding: 2px 8px; border-radius: 6px; }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      background: #F8FAFC;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #334155;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: #0F172A;
+      color: white;
+      border-color: #0F172A;
+      transform: translateY(-1px);
+    }
+    .btn-action-primary {
+      background: #2563EB;
+      color: white;
+      border-color: #2563EB;
+    }
+    .btn-action-primary:hover {
+      background: #1D4ED8;
+      border-color: #1D4ED8;
+    }
+
+    /* Header */
+    header { text-align: center; margin-bottom: 30px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      background: white;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #EA580C;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.12);
+      border: 2px dashed #FED7AA;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Fredoka', cursive;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      color: #0F172A;
+      margin-bottom: 10px;
+      line-height: 1.15;
+    }
+    .highlight-text {
+      background: linear-gradient(120deg, #F97316 0%, #EC4899 50%, #8B5CF6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sub-hero { font-size: 1.1rem; color: #475569; max-width: 620px; margin: 0 auto; font-weight: 600; }
+
+    /* Subject Tabs */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0 36px;
+    }
+    .tab-btn {
+      border: none;
+      background: white;
+      padding: 9px 20px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { transform: translateY(-2px); }
+    .tab-btn.active { background: #0F172A; color: white; }
+
+    /* Subject Section */
+    .subject-section { margin-bottom: 40px; }
+    .subject-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(0,0,0,0.06);
+    }
+    .subject-icon {
+      font-size: 1.8rem;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .subject-title { font-family: 'Fredoka', cursive; font-size: 1.6rem; font-weight: 700; color: #0F172A; }
+    .subject-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; background: white; border: 1px solid #CBD5E1; color: #64748B; }
+
+    /* Games Grid */
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .game-card {
+      background: white;
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--card-shadow);
+      border: 3px solid #F1F5F9;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .game-card:hover { transform: translateY(-6px); box-shadow: var(--card-shadow-hover); border-color: #E2E8F0; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .game-avatar {
+      font-size: 2.6rem;
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-tag { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 30px; letter-spacing: 0.5px; }
+    .tag-live { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+    .tag-coming { background: #F1F5F9; color: #64748B; border: 1px solid #CBD5E1; }
+
+    .game-title { font-family: 'Fredoka', cursive; font-size: 1.3rem; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+    .game-desc { color: #64748B; font-size: 0.92rem; line-height: 1.45; margin-bottom: 14px; flex-grow: 1; }
+
+    /* Saved Stats Ribbon on Card */
+    .saved-stat-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .play-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-play-active { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+    .btn-play-active:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+    .btn-play-alt { background: linear-gradient(135deg, #059669, #047857); color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25); }
+    .btn-play-alt:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+    .btn-disabled { background: #E2E8F0; color: #94A3B8; cursor: not-allowed; }
+
+    /* Custom Theme Colors */
+    .theme-math .subject-icon { background: #FEF3C7; color: #D97706; }
+    .theme-math .game-avatar { background: #FEF3C7; }
+    .theme-ask .subject-icon { background: #CFFAFE; color: #0891B2; }
+    .theme-ask .game-avatar { background: #CFFAFE; }
+    .theme-science .subject-icon { background: #D1FAE5; color: #059669; }
+    .theme-science .game-avatar { background: #D1FAE5; }
+    .theme-bm .subject-icon { background: #FEE2E2; color: #DC2626; }
+    .theme-bm .game-avatar { background: #FEE2E2; }
+    .theme-bi .subject-icon { background: #EDE9FE; color: #7C3AED; }
+    .theme-bi .game-avatar { background: #EDE9FE; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal.open { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-head h3 { font-family: 'Fredoka', cursive; font-size: 1.4rem; color: #0F172A; }
+    .close-btn { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #64748B; }
+
+    .user-select-list { display: grid; gap: 8px; margin-bottom: 18px; }
+    .user-select-item {
+      padding: 10px 14px;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .user-select-item:hover, .user-select-item.selected {
+      border-color: #2563EB;
+      background: #EFF6FF;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-bubble b1"></div>
+  <div class="bg-bubble b2"></div>
+  <div class="bg-bubble b3"></div>
+
+  <div class="container">
+    <!-- Active User Bar (Incorporate users.json & game_state.json) -->
+    <div class="user-profile-bar">
+      <div class="user-pill">
+        <div class="u-avatar" id="bar-avatar">🦊</div>
+        <div>
+          <div class="u-name" id="bar-name">Amir</div>
+          <span class="u-id" id="bar-id">ID: usr_8f2a1b04</span>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="btn-action" onclick="openSwitchModal()">👤 Tukar Pemain</button>
+        <button class="btn-action btn-action-primary" onclick="openLeaderboardModal()">🏆 Papan Kedudukan</button>
+        <button class="btn-action" onclick="GameStorage.downloadUsersJSON()" title="Muat turun users.json">📥 users.json</button>
+        <button class="btn-action" onclick="GameStorage.downloadGameStateJSON()" title="Muat turun game_state.json">📥 game_state.json</button>
+      </div>
+    </div>
+
+    <!-- Hero Header -->
+    <header>
+      <div class="hero-badge">
+        <span>⭐</span> PORTAL PENDIDIKAN INTERAKTIF <span>⭐</span>
+      </div>
+      <h1>Zon Permainan <span class="highlight-text">Pintar Kanak-Kanak</span> 🎮</h1>
+      <p class="sub-hero">
+        Koleksi permainan video arked & kuiz interaktif. Pilih subjek kegemaran anda untuk mula bermain!
+      </p>
+
+      <!-- Subject Filter -->
+      <div class="filter-bar">
+        <button class="tab-btn active" onclick="filterCategory('all')">🌟 Semua Subjek</button>
+        <button class="tab-btn" onclick="filterCategory('matematik')">📐 Matematik</button>
+        <button class="tab-btn" onclick="filterCategory('ask')">💻 Asas Sains Komputer</button>
+        <button class="tab-btn" onclick="filterCategory('sains')">🔬 Sains</button>
+        <button class="tab-btn" onclick="filterCategory('bm')">📖 Bahasa Melayu</button>
+        <button class="tab-btn" onclick="filterCategory('bi')">🌍 English</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ==============================================
+           SUBJEK: MATEMATIK
+           ============================================== -->
+      <section class="subject-section theme-math" data-category="matematik">
+        <div class="subject-heading">
+          <div class="subject-icon">📐</div>
+          <h2 class="subject-title">Matematik</h2>
+          <span class="subject-badge">2 Permainan Aktif</span>
+        </div>
+
+        <div class="games-grid">
+          <!-- Game 1: DuitQuest Arcade -->
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">⚡</div>
+                <span class="status-tag tag-live">Aksi Arked</span>
+              </div>
+              <h3 class="game-title">DuitQuest Arcade</h3>
+              <p class="game-desc">
+                Jawab kuiz Matematik Pengguna untuk kumpul wang & tenaga, kemudian rentasi platform halangan laser dan lompat masuk portal untuk mara ke tahap tertinggi!
+              </p>
+              <div class="saved-stat-box" id="stat-duitquest">
+                <span>Rekod Anda:</span>
+                <span id="stat-duitquest-val" style="font-weight:700; color:#2563EB;">Tahap 1 | ⚡100% | RM500</span>
+              </div>
+            </div>
+            <a href="./duitquest_arcade.html" class="play-btn btn-play-active">
+              <span>MAIN ARKED</span> <span>🚀</span>
+            </a>
+          </article>
+
+          <!-- Game 2: DuitSmart 15 -->
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">💰</div>
+                <span class="status-tag tag-live">Simulasi Papan</span>
+              </div>
+              <h3 class="game-title">DuitSmart 15: Jutawan Remaja</h3>
+              <p class="game-desc">
+                Simulasi kewangan 10 pusingan kehidupan remaja 15 tahun! Baling dadu peristiwa, elak jerat skim scam, kembangkan faedah kompaun, dan tawan podium!
+              </p>
+              <div class="saved-stat-box" id="stat-duitsmart">
+                <span>Rekod Anda:</span>
+                <span id="stat-duitsmart-val" style="font-weight:700; color:#059669;">Skor: 0 | Nilai Bersih: RM500</span>
+              </div>
+            </div>
+            <a href="./duitsmart15.html" class="play-btn btn-play-alt">
+              <span>MAIN SIMULASI</span> <span>🎲</span>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SUBJEK: ASAS SAINS KOMPUTER (ASK)
+           ============================================== -->
+      <section class="subject-section theme-ask" data-category="ask">
+        <div class="subject-heading">
+          <div class="subject-icon">💻</div>
+          <h2 class="subject-title">Asas Sains Komputer (ASK)</h2>
+          <span class="subject-badge">Akan Datang</span>
+        </div>
+
+        <div class="games-grid">
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">🤖</div>
+                <span class="status-tag tag-coming">Slot Baharu</span>
+              </div>
+              <h3 class="game-title">Isihan Buih: Misi Robot Kod</h3>
+              <p class="game-desc">
+                Susun memori cip mengikut logik algoritma Bubble Sort dan baiki ralat sintaks Python sebelum bateri robot kehabisan!
+              </p>
+            </div>
+            <button class="play-btn btn-disabled" disabled>
+              <span>AKAN DATANG</span> <span>🔒</span>
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SUBJEK: SAINS
+           ============================================== -->
+      <section class="subject-section theme-science" data-category="sains">
+        <div class="subject-heading">
+          <div class="subject-icon">🔬</div>
+          <h2 class="subject-title">Sains</h2>
+          <span class="subject-badge">Akan Datang</span>
+        </div>
+
+        <div class="games-grid">
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">🧬</div>
+                <span class="status-tag tag-coming">Slot Baharu</span>
+              </div>
+              <h3 class="game-title">Eksplorasi Sel & Ekosistem</h3>
+              <p class="game-desc">
+                Terokai struktur mikroskopik sel hidupan, seimbangkan rantai makanan pengguna primer dan sekunder, serta selesaikan teka-teki tenaga!
+              </p>
+            </div>
+            <button class="play-btn btn-disabled" disabled>
+              <span>AKAN DATANG</span> <span>🔒</span>
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SUBJEK: BAHASA MELAYU
+           ============================================== -->
+      <section class="subject-section theme-bm" data-category="bm">
+        <div class="subject-heading">
+          <div class="subject-icon">📖</div>
+          <h2 class="subject-title">Bahasa Melayu</h2>
+          <span class="subject-badge">Akan Datang</span>
+        </div>
+
+        <div class="games-grid">
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">🎭</div>
+                <span class="status-tag tag-coming">Slot Baharu</span>
+              </div>
+              <h3 class="game-title">Raja Peribahasa & Tatabahasa</h3>
+              <p class="game-desc">
+                Teka maksud simpulan bahasa, betulkan kesalahan ejaan kata pinjaman, dan kumpul mahkota kejuaraan bahasa!
+              </p>
+            </div>
+            <button class="play-btn btn-disabled" disabled>
+              <span>AKAN DATANG</span> <span>🔒</span>
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SUBJEK: ENGLISH
+           ============================================== -->
+      <section class="subject-section theme-bi" data-category="bi">
+        <div class="subject-heading">
+          <div class="subject-icon">🌍</div>
+          <h2 class="subject-title">English Language</h2>
+          <span class="subject-badge">Akan Datang</span>
+        </div>
+
+        <div class="games-grid">
+          <article class="game-card">
+            <div>
+              <div class="card-top">
+                <div class="game-avatar">🧙‍♂️</div>
+                <span class="status-tag tag-coming">Slot Baharu</span>
+              </div>
+              <h3 class="game-title">Word Wizard Quest</h3>
+              <p class="game-desc">
+                Match irregular verb spells, solve grammar mazes, and unlock vocabulary treasures across enchanted islands!
+              </p>
+            </div>
+            <button class="play-btn btn-disabled" disabled>
+              <span>AKAN DATANG</span> <span>🔒</span>
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Switch / Register User -->
+  <div class="modal" id="modal-switch">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>👤 Pilih / Tukar Pemain</h3>
+        <button class="close-btn" onclick="closeSwitchModal()">&times;</button>
+      </div>
+
+      <p style="font-size:0.85rem; color:#64748B; margin-bottom:12px;">Pilih pemain sedia ada dari users.json:</p>
+      <div class="user-select-list" id="users-picker"></div>
+
+      <hr style="border:none; border-top:1.5px dashed #E2E8F0; margin:16px 0;">
+
+      <p style="font-size:0.85rem; font-weight:700; color:#0F172A; margin-bottom:8px;">Atau Daftar Pemain Baharu (Tanpa Password):</p>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="text" id="new-player-name" placeholder="Nama anda (cth: Hakimi)" style="flex:1; padding:10px 14px; border:1.5px solid #CBD5E1; border-radius:10px; font-weight:700;">
+        <select id="new-player-avatar" style="padding:10px; border:1.5px solid #CBD5E1; border-radius:10px; font-size:1.2rem;">
+          <option value="🦊">🦊</option>
+          <option value="🚀">🚀</option>
+          <option value="⚡">⚡</option>
+          <option value="🤖">🤖</option>
+          <option value="🦁">🦁</option>
+          <option value="🐼">🐼</option>
+        </select>
+      </div>
+      <button class="play-btn btn-play-active" onclick="registerNewPlayer()">+ Simpan Pemain & Mula</button>
+    </div>
+  </div>
+
+  <!-- Modal: Leaderboard -->
+  <div class="modal" id="modal-leaderboard">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>🏆 Papan Kedudukan Murid</h3>
+        <button class="close-btn" onclick="closeLeaderboardModal()">&times;</button>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:0.85rem; font-weight:700; color:#64748B;">Pilih Permainan:</label>
+        <select id="select-board-game" onchange="renderLeaderboard()" style="width:100%; padding:8px 12px; border:1.5px solid #CBD5E1; border-radius:10px; font-weight:700; margin-top:4px;">
+          <option value="duitquest_arcade">DuitQuest Arcade (Aksi Arked)</option>
+          <option value="duitsmart15">DuitSmart 15 (Simulasi Papan)</option>
+        </select>
+      </div>
+      <div id="leaderboard-content" style="display:grid; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Integrated Storage Script -->
+  <script src="./game_storage.js"></script>
+  <script>
+    // Refresh UI with active player profile and stored game progress
+    function refreshUserBar() {
+      const u = GameStorage.getActiveUser();
+      if (!u) return;
+      document.getElementById('bar-avatar').innerText = u.avatar || '⭐';
+      document.getElementById('bar-name').innerText = u.display_name;
+      document.getElementById('bar-id').innerText = `ID: ${u.user_id}`;
+
+      // Refresh saved stats for DuitQuest Arcade
+      const dStats = GameStorage.loadProgress('duitquest_arcade', u.user_id);
+      if (dStats) {
+        document.getElementById('stat-duitquest-val').innerText = `Tahap ${dStats.level} | ⚡${dStats.energy}% | RM${dStats.money}`;
+      } else {
+        document.getElementById('stat-duitquest-val').innerText = `Belum Main (Tahap 1)`;
+      }
+
+      // Refresh saved stats for DuitSmart 15
+      const sStats = GameStorage.loadProgress('duitsmart15', u.user_id);
+      if (sStats) {
+        document.getElementById('stat-duitsmart-val').innerText = `Tahap ${sStats.level} | RM${sStats.money}`;
+      } else {
+        document.getElementById('stat-duitsmart-val').innerText = `Belum Main (Modal RM500)`;
+      }
+    }
+
+    function openSwitchModal() {
+      const modal = document.getElementById('modal-switch');
+      const list = document.getElementById('users-picker');
+      const users = GameStorage.getAllUsers();
+      const current = GameStorage.getActiveUser();
+      list.innerHTML = '';
+
+      users.forEach(u => {
+        const isSel = current && u.user_id === current.user_id;
+        list.innerHTML += `
+          <div class="user-select-item ${isSel ? 'selected' : ''}" onclick="selectUser('${u.user_id}')">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.4rem;">${u.avatar}</span>
+              <div>
+                <div style="font-weight:800; font-size:0.95rem;">${u.display_name}</div>
+                <div style="font-size:0.75rem; color:#64748B; font-family:'JetBrains Mono';">${u.user_id}</div>
+              </div>
+            </div>
+            ${isSel ? '<span style="font-size:0.8rem; font-weight:800; color:#2563EB;">AKTIF</span>' : ''}
+          </div>
+        `;
+      });
+      modal.classList.add('open');
+    }
+    function closeSwitchModal() { document.getElementById('modal-switch').classList.remove('open'); }
+
+    function selectUser(uid) {
+      GameStorage.setActiveUser(uid);
+      closeSwitchModal();
+      refreshUserBar();
+    }
+
+    function registerNewPlayer() {
+      const name = document.getElementById('new-player-name').value.trim();
+      const avatar = document.getElementById('new-player-avatar').value;
+      if (!name) return alert("Sila masukkan nama anda!");
+      GameStorage.registerUser(name, avatar);
+      closeSwitchModal();
+      refreshUserBar();
+    }
+
+    function openLeaderboardModal() {
+      document.getElementById('modal-leaderboard').classList.add('open');
+      renderLeaderboard();
+    }
+    function closeLeaderboardModal() { document.getElementById('modal-leaderboard').classList.remove('open'); }
+
+    function renderLeaderboard() {
+      const gameId = document.getElementById('select-board-game').value;
+      const board = GameStorage.getLeaderboard(gameId);
+      const container = document.getElementById('leaderboard-content');
+      container.innerHTML = '';
+
+      if (board.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748B;">Belum ada rekod permainan untuk game ini.</div>`;
+        return;
+      }
+
+      board.forEach((item, idx) => {
+        const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx+1}`));
+        container.innerHTML += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-weight:800; font-size:1.1rem; width:28px;">${medal}</span>
+              <span style="font-size:1.4rem;">${item.avatar}</span>
+              <div>
+                <div style="font-weight:800; font-size:0.95rem;">${item.display_name}</div>
+                <div style="font-size:0.75rem; color:#64748B; font-family:'JetBrains Mono';">${item.user_id}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800; font-family:'JetBrains Mono'; color:#2563EB;">Tahap ${item.level}</div>
+              <div style="font-size:0.78rem; font-family:'JetBrains Mono'; color:#059669;">⚡${item.energy}% | RM${item.money}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filterCategory(cat) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.querySelectorAll('.subject-section').forEach(sec => {
+        if (cat === 'all' || sec.getAttribute('data-category') === cat) {
+          sec.style.display = 'block';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      refreshUserBar();
+    });
+  </script>
+</body>
+</html>

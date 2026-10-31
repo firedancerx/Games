@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DuitSmart 15: Cabaran Jutawan Remaja</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --primary: #1E3A8A;
+      --primary-light: #3B82F6;
+      --emerald: #059669;
+      --emerald-light: #10B981;
+      --amber: #D97706;
+      --rose: #E11D48;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 20px; line-height: 1.5; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .logo-badge { background: var(--primary); color: white; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
+    .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 20px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-weight: 700; font-size: 0.95rem; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #172554; transform: translateY(-1px); }
+    .btn-emerald { background: var(--emerald); color: white; }
+    .btn-emerald:hover { background: #047857; }
+    .btn-amber { background: var(--amber); color: white; }
+    .btn-rose { background: var(--rose); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
+    .btn-outline:hover { background: #F1F5F9; }
+    .players-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .player-card { background: white; border: 2px solid var(--border); border-radius: 14px; padding: 16px; transition: all 0.3s ease; position: relative; }
+    .player-card.active { border-color: var(--primary-light); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); transform: scale(1.02); }
+    .avatar-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: #EEF2F6; margin-bottom: 12px; }
+    .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 6px; }
+    .stat-val { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    .event-card { border-left: 6px solid var(--primary); }
+    .event-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: #EFF6FF; color: var(--primary); margin-bottom: 10px; }
+    .options-grid { display: grid; gap: 12px; margin-top: 16px; }
+    .option-btn { width: 100%; text-align: left; padding: 14px 18px; border: 2px solid var(--border); border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+    .option-btn:hover { border-color: var(--primary-light); background: #F8FAFC; }
+    .calc-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .calc-modal.open { display: flex; }
+    .calc-content { background: white; border-radius: 20px; max-width: 500px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto; }
+    .input-group { margin-bottom: 12px; }
+    .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
+    .input-group input, .input-group select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.95rem; }
+    .result-pill { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 12px; border-radius: 10px; font-weight: 700; margin-top: 14px; text-align: center; font-family: 'JetBrains Mono', monospace; }
+    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; }
+    .dice-box { display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; background: white; border: 3px solid var(--primary); border-radius: 14px; font-size: 2rem; font-weight: 800; color: var(--primary); margin: 0 auto 16px; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15); }
+    .dice-box.rolling { animation: roll 0.6s infinite ease-in-out; }
+    @keyframes roll { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.15); } 100% { transform: rotate(360deg) scale(1); } }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+  <div class="container">
+    <header>
+      <div class="logo-badge">
+        <span>💰</span> DuitSmart 15
+      </div>
+      <div>
+        <button class="btn btn-outline" onclick="openCalc()">🧮 Kalkulator KSSM</button>
+      </div>
+    </header>
+
+    <!-- Setup Screen -->
+    <div id="screen-setup" class="card">
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 8px;">🎮 Pendaftaran Pemain</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Sesuai untuk murid Tingkatan 3 (Umur 15 Tahun) - Main secara solo atau bersama 2 hingga 4 orang rakan secara bergilir!</p>
+      
+      <div class="input-group">
+        <label>Pilih Bilangan Pemain:</label>
+        <select id="player-count-select" onchange="renderNameInputs()">
+          <option value="1">1 Pemain (Mod Solo)</option>
+          <option value="2" selected>2 Pemain (Bergilir)</option>
+          <option value="3">3 Pemain (Bergilir)</option>
+          <option value="4">4 Pemain (Bergilir)</option>
+        </select>
+      </div>
+
+      <div id="player-inputs-container" style="display: grid; gap: 12px; margin-bottom: 24px;"></div>
+
+      <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="startGame()">🚀 Mulakan Cabaran 10 Pusingan!</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="screen-game" style="display: none;">
+      <div class="players-grid" id="players-dashboard"></div>
+
+      <div class="card event-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span class="event-badge" id="round-badge">Pusingan 1 / 10</span>
+          <span id="turn-announcement" style="font-weight: 700; color: var(--primary);">Giliran: Amir</span>
+        </div>
+
+        <div id="dice-section" style="text-align: center; padding: 20px 0;">
+          <div class="dice-box" id="dice-display">🎲</div>
+          <button class="btn btn-primary" id="btn-roll-dice" onclick="rollDice()">Baling Dadu Kejadian!</button>
+        </div>
+
+        <div id="event-content" style="display: none;">
+          <h3 id="event-title" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;"></h3>
+          <p id="event-desc" style="color: #334155; margin-bottom: 16px; font-size: 1rem;"></p>
+          
+          <div id="math-bonus-box" style="display: none; background: #F1F5F9; border-left: 4px solid var(--emerald); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;">
+            <div style="font-weight: 700; font-size: 0.85rem; color: var(--emerald); margin-bottom: 4px;">🧠 CABARAN MATEMATIK BONUS (+RM50 & +25 IQ)</div>
+            <p id="math-question" style="font-size: 0.9rem; font-weight: 600;"></p>
+            <div id="math-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;"></div>
+          </div>
+
+          <div class="options-grid" id="options-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Podium Screen -->
+    <div id="screen-podium" class="card" style="display: none; text-align: center;">
+      <h2 style="font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 8px;">🏆 Keputusan Akhir Jutawan Remaja!</h2>
+      <p style="color: var(--text-muted); margin-bottom: 24px;">Tahniah kepada semua peserta! Berikut adalah kedudukan nilai kekayaan bersih dan tahap celik kewangan KSSM anda.</p>
+      <div id="podium-results" style="display: grid; gap: 16px; max-width: 600px; margin: 0 auto 24px;"></div>
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Main Semula</button>
+    </div>
+  </div>
+
+  <!-- KSSM Calculator Modal -->
+  <div class="calc-modal" id="calc-modal">
+    <div class="calc-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-weight: 800; color: var(--primary);">🧮 Kalkulator Matematik Pengguna KSSM</h3>
+        <button onclick="closeCalc()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="input-group">
+        <label>Pilih Rumus:</label>
+        <select id="calc-type" onchange="toggleCalcFields()">
+          <option value="compound">Faedah Kompaun: MV = P(1 + r/n)^(nt)</option>
+          <option value="roi">Pulangan Pelaburan: ROI = (Pulangan / Modal) × 100%</option>
+          <option value="simple">Faedah Mudah / Pinjaman: I = Prt</option>
+        </select>
+      </div>
+
+      <div id="calc-fields"></div>
+      <button class="btn btn-emerald" style="width: 100%; margin-top: 10px;" onclick="calculateFormula()">Kira Nilai Tepat</button>
+      <div id="calc-result" class="result-pill" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type = 'sine', duration = 0.15) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+    function playSuccess() { playBeep(523.25, 'triangle', 0.1); setTimeout(() => playBeep(659.25, 'triangle', 0.1), 100); setTimeout(() => playBeep(783.99, 'triangle', 0.25), 200); }
+    function playWarning() { playBeep(220, 'sawtooth', 0.2); setTimeout(() => playBeep(180, 'sawtooth', 0.3), 150); }
+
+    let players = [];
+    let currentPlayerIdx = 0;
+    let currentRound = 1;
+    const maxRounds = 10;
+    const defaultAvatars = ['👦', '👧', '🧒', '👩'];
+    const defaultNames = ['Amir', 'Sarah', 'Dinesh', 'Mei Ling'];
+
+    const gameEvents = [
+      {
+        title: "Tawaran Telefon Pintar Baharu",
+        desc: "Telefon idaman anda berharga RM1,200. Kedai menawarkan ansuran faedah sama rata 5% setahun selama 2 tahun (deposit RM200) ATAU baiki skrin lama dengan RM100 dan baki wang disimpan dalam akaun kompaun.",
+        math: { q: "Berapakah faedah pinjaman jika baki RM1,000 diambil secara faedah sama rata 5% selama 2 tahun (I = Prt)?", options: ["RM100", "RM50", "RM200", "RM1,100"], correct: 0 },
+        options: [
+          { text: "Beli tunai RM1,200 (jika ada wang).", cost: 1200, iq: 10, msg: "Beli tunai tiada hutang, tetapi mengurangkan simpanan tunai!" },
+          { text: "Ambil pelan ansuran (Deposit RM200 + hutang RM1,100).", cost: 200, debt: 1100, iq: -15, msg: "Hutang ditambah dengan faedah sama rata. Bebanan bulanan bertambah!" },
+          { text: "Baiki telefon lama (RM100) & labur baki wang ke Simpanan Tetap.", cost: 100, invest: 400, iq: 30, msg: "Keputusan cemerlang! Wang bekerja untuk anda dengan faedah kompaun." }
+        ]
+      },
+      {
+        title: "Hari Keusahawanan Sekolah",
+        desc: "Kelab anda membuka gerai jualan jus buah. Modal yang diperlukan ialah RM200 setiap orang. Anda dijangka menerima pulangan jualan RM320.",
+        math: { q: "Berapakah peratusan ROI bagi keuntungan RM120 daripada modal RM200?", options: ["50%", "60%", "75%", "40%"], correct: 1 },
+        options: [
+          { text: "Sumbang modal RM200 dan berniaga bersungguh-sungguh.", cost: 200, rewardCash: 320, iq: 25, msg: "Untung bersih RM120! ROI anda ialah 60%!" },
+          { text: "Tolak peluang berniaga dan simpan wang di rumah.", cost: 0, iq: -5, msg: "Wang selamat tetapi tidak menjana pulangan modal." }
+        ]
+      },
+      {
+        title: "Skim Pelaburan 'Pantas Kaya' Telegram",
+        desc: "Rakan sekolah menunjukkan skim Telegram menjanjikan pulangan 50% dalam masa 24 jam dengan memasukkan modal RM300.",
+        math: { q: "Mengapakah pelaburan dengan pulangan luar biasa tanpa risiko disahkan sebagai 'scam'?", options: ["Prinsip High Risk High Return dilanggar", "Tiada lesen Bank Negara Malaysia", "Kedua-dua jawapan di atas tepat", "Sebab untung terlalu lambat"], correct: 2 },
+        options: [
+          { text: "Lapor kepada guru/polis dan tolak serta-merta.", cost: 0, iq: 40, msg: "Tahniah! Anda mengelak penipuan skim cepat kaya!" },
+          { text: "Cuba nasib labur RM300.", cost: 300, iq: -40, msg: "Aduh! Akaun Telegram disekat dan duit RM300 lebur begitu sahaja!" }
+        ]
+      },
+      {
+        title: "Pemberian Duit Raya / Angpau & Simpanan Kompaun",
+        desc: "Anda menerima RM300 semasa musim perayaan. Anda ingin memastikan wang ini berkembang secara optimum.",
+        math: { q: "Jika RM300 dikompaunkan bulanan (n=12) pada kadar 6% setahun, apakah nilai kuasa nt untuk 3 tahun?", options: ["36", "15", "24", "12"], correct: 0 },
+        options: [
+          { text: "Masukkan semua RM300 ke dalam Amanah Saham (ASNB).", cost: 0, invest: 300, iq: 35, msg: "Simpanan kompaun anda mula mengumpul faedah berganda!" },
+          { text: "Habiskan RM300 membeli barangan permainan video.", cost: 300, iq: -10, msg: "Puas hati sementara, tetapi tiada aset masa hadapan!" }
+        ]
+      },
+      {
+        title: "Kad Kredit Ibu Bapa & Bayaran Minimum 5%",
+        desc: "Bapa meminta pandangan anda tentang penyata kad kredit RM2,000. Beliau ingin tahu sama ada patut membayar jumlah minimum RM100 (5%) atau bayaran penuh.",
+        math: { q: "Jika baki RM1,900 tertunggak pada kadar 18% setahun, berapakah anggaran faedah sebulan (1.5%)?", options: ["RM28.50", "RM15.00", "RM45.00", "RM10.50"], correct: 0 },
+        options: [
+          { text: "Nasihatkan bapa bayar penuh RM2,000 untuk elak faedah harian.", cost: 0, iq: 35, msg: "Tepat sekali! Menghapuskan hutang kad kredit serta-merta menjimatkan caj faedah." },
+          { text: "Cadangkan bayar minimum RM100 sahaja setiap bulan.", cost: 0, iq: -20, msg: "Kurang bijak! Baki tertunggak akan dikenakan faedah harian sehingga bertahun-tahun." }
+        ]
+      }
+    ];
+
+    function renderNameInputs() {
+      const count = parseInt(document.getElementById('player-count-select').value);
+      const container = document.getElementById('player-inputs-container');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        container.innerHTML += `
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 1.5rem;">${defaultAvatars[i]}</span>
+            <input type="text" id="pname-${i}" value="${defaultNames[i]}" placeholder="Nama Pemain ${i+1}" style="flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;">
+          </div>
+        `;
+      }
+    }
+    renderNameInputs();
+
+    function startGame() {
+      const count = parseInt(document.getElementById('player-count-select').value);
+      players = [];
+      for (let i = 0; i < count; i++) {
+        const name = document.getElementById(`pname-${i}`).value.trim() || `Pemain ${i+1}`;
+        players.push({
+          id: i,
+          name: name,
+          avatar: defaultAvatars[i],
+          cash: 500,
+          invest: 200,
+          debt: 0,
+          iq: 100
+        });
+      }
+      currentPlayerIdx = 0;
+      currentRound = 1;
+      document.getElementById('screen-setup').style.display = 'none';
+      document.getElementById('screen-game').style.display = 'block';
+      updateDashboard();
+      prepareTurn();
+    }
+
+    function updateDashboard() {
+      const container = document.getElementById('players-dashboard');
+      container.innerHTML = '';
+      players.forEach((p, idx) => {
+        const netWorth = (p.cash + p.invest) - p.debt;
+        const isActive = idx === currentPlayerIdx;
+        container.innerHTML += `
+          <div class="player-card ${isActive ? 'active' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="avatar-circle">${p.avatar}</div>
+              <span style="font-size: 0.75rem; font-weight: 700; color: ${p.iq >= 120 ? '#059669' : '#D97706'}">IQ: ${p.iq}</span>
+            </div>
+            <div style="font-weight: 800; font-size: 1.05rem;">${p.name}</div>
+            <div class="stat-row"><span style="color: var(--text-muted)">Tunai:</span><span class="stat-val" style="color: var(--emerald);">RM ${p.cash.toLocaleString()}</span></div>
+            <div class="stat-row"><span style="color: var(--text-muted)">Pelaburan:</span><span class="stat-val" style="color: var(--primary-light);">RM ${p.invest.toLocaleString()}</span></div>
+            <div class="stat-row"><span style="color: var(--text-muted)">Hutang:</span><span class="stat-val" style="color: var(--rose);">RM ${p.debt.toLocaleString()}</span></div>
+            <div class="stat-row" style="border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 8px;">
+              <span style="font-weight: 700;">Nilai Bersih:</span>
+              <span class="stat-val" style="font-weight: 800; color: ${netWorth >= 0 ? 'var(--primary)' : 'var(--rose)'};">RM ${netWorth.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function prepareTurn() {
+      const p = players[currentPlayerIdx];
+      if (p.invest > 0) {
+        p.invest += Math.round(p.invest * 0.01);
+      }
+      if (p.debt > 0) {
+        p.debt += Math.round(p.debt * 0.015);
+      }
+
+      document.getElementById('round-badge').innerText = `Pusingan ${currentRound} / ${maxRounds}`;
+      document.getElementById('turn-announcement').innerText = `Giliran: ${p.avatar} ${p.name}`;
+      document.getElementById('dice-section').style.display = 'block';
+      document.getElementById('event-content').style.display = 'none';
+      document.getElementById('btn-roll-dice').disabled = false;
+      document.getElementById('dice-display').innerText = '🎲';
+      updateDashboard();
+    }
+
+    function rollDice() {
+      const dice = document.getElementById('dice-display');
+      const btn = document.getElementById('btn-roll-dice');
+      btn.disabled = true;
+      dice.classList.add('rolling');
+      playBeep(440, 'square', 0.2);
+
+      setTimeout(() => {
+        dice.classList.remove('rolling');
+        const roll = Math.floor(Math.random() * 6) + 1;
+        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        dice.innerText = diceEmojis[roll - 1];
+        playSuccess();
+        loadEvent();
+      }, 700);
+    }
+
+    function loadEvent() {
+      const ev = gameEvents[Math.floor(Math.random() * gameEvents.length)];
+      document.getElementById('dice-section').style.display = 'none';
+      document.getElementById('event-content').style.display = 'block';
+
+      document.getElementById('event-title').innerText = ev.title;
+      document.getElementById('event-desc').innerText = ev.desc;
+
+      const mathBox = document.getElementById('math-bonus-box');
+      if (ev.math) {
+        mathBox.style.display = 'block';
+        document.getElementById('math-question').innerText = ev.math.q;
+        const optContainer = document.getElementById('math-options');
+        optContainer.innerHTML = '';
+        ev.math.options.forEach((optText, oIdx) => {
+          optContainer.innerHTML += `
+            <button class="btn btn-outline" style="font-size: 0.85rem; padding: 6px 10px;" onclick="answerMath(${oIdx}, ${ev.math.correct}, this)">${optText}</button>
+          `;
+        });
+      } else {
+        mathBox.style.display = 'none';
+      }
+
+      const optGrid = document.getElementById('options-container');
+      optGrid.innerHTML = '';
+      ev.options.forEach((opt, oIdx) => {
+        optGrid.innerHTML += `
+          <button class="option-btn" onclick="chooseOption(${oIdx})">
+            <strong>Pilihan ${String.fromCharCode(65 + oIdx)}:</strong> ${opt.text}
+          </button>
+        `;
+      });
+      window.currentEvent = ev;
+    }
+
+    function answerMath(selected, correct, btnElem) {
+      const p = players[currentPlayerIdx];
+      const allBtns = btnElem.parentElement.querySelectorAll('button');
+      allBtns.forEach(b => b.disabled = true);
+
+      if (selected === correct) {
+        btnElem.style.background = '#A7F3D0';
+        btnElem.style.borderColor = '#059669';
+        p.cash += 50;
+        p.iq += 25;
+        playSuccess();
+        triggerConfetti();
+        alert("🎉 TAHNIAH! Jawapan Matematik anda TEPAT! Anda menerima bonus RM50 Tunai dan +25 Celik IQ!");
+      } else {
+        btnElem.style.background = '#FECDD3';
+        btnElem.style.borderColor = '#E11D48';
+        playWarning();
+        alert("❌ Alamak, jawapan belum tepat! Sila rujuk Kalkulator KSSM untuk memahami formula.");
+      }
+      updateDashboard();
+    }
+
+    function chooseOption(optIdx) {
+      const opt = window.currentEvent.options[optIdx];
+      const p = players[currentPlayerIdx];
+
+      if (opt.cost && p.cash < opt.cost) {
+        playWarning();
+        alert(`Tunai anda (RM ${p.cash}) tidak mencukupi untuk pilihan ini (RM ${opt.cost})! Sila pilih opsyen lain.`);
+        return;
+      }
+
+      if (opt.cost) p.cash -= opt.cost;
+      if (opt.debt) p.debt += opt.debt;
+      if (opt.invest) p.invest += opt.invest;
+      if (opt.rewardCash) p.cash += opt.rewardCash;
+      if (opt.iq) p.iq += opt.iq;
+
+      playSuccess();
+      alert(`Hasil Tindakan: ${opt.msg}`);
+
+      currentPlayerIdx++;
+      if (currentPlayerIdx >= players.length) {
+        currentPlayerIdx = 0;
+        currentRound++;
+      }
+
+      if (currentRound > maxRounds) {
+        endGame();
+      } else {
+        prepareTurn();
+      }
+    }
+
+    function endGame() {
+      document.getElementById('screen-game').style.display = 'none';
+      document.getElementById('screen-podium').style.display = 'block';
+      triggerConfetti();
+
+      players.sort((a, b) => ((b.cash + b.invest) - b.debt) - ((a.cash + a.invest) - a.debt));
+
+      const resBox = document.getElementById('podium-results');
+      resBox.innerHTML = '';
+      players.forEach((p, idx) => {
+        const netWorth = (p.cash + p.invest) - p.debt;
+        const medal = idx === 0 ? '🥇 Tempat Pertama' : (idx === 1 ? '🥈 Tempat Kedua' : (idx === 2 ? '🥉 Tempat Ketiga' : '🎖️ Peserta Cemerlang'));
+        resBox.innerHTML += `
+          <div style="background: #F8FAFC; border: 2px solid var(--border); border-radius: 14px; padding: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">${medal}: ${p.avatar} ${p.name}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Skor Celik IQ: <strong>${p.iq}</strong> | Tunai: RM ${p.cash} | Pelaburan: RM ${p.invest}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">NILAI BERSIH</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 800; color: ${netWorth >= 0 ? 'var(--emerald)' : 'var(--rose)'};">
+                RM ${netWorth.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function openCalc() { document.getElementById('calc-modal').classList.add('open'); toggleCalcFields(); }
+    function closeCalc() { document.getElementById('calc-modal').classList.remove('open'); }
+    function toggleCalcFields() {
+      const type = document.getElementById('calc-type').value;
+      const f = document.getElementById('calc-fields');
+      document.getElementById('calc-result').style.display = 'none';
+      if (type === 'compound') {
+        f.innerHTML = `
+          <div class="input-group"><label>Prinsipal, P (RM):</label><input type="number" id="c-p" value="1000"></div>
+          <div class="input-group"><label>Kadar Faedah Tahunan, r (%):</label><input type="number" id="c-r" value="5" step="0.1"></div>
+          <div class="input-group"><label>Kekerapan Pengkompaunan Setahun, n:</label>
+            <select id="c-n">
+              <option value="1">1 (Tahunan)</option>
+              <option value="2">2 (Setengah Tahun)</option>
+              <option value="4">4 (Suku Tahun)</option>
+              <option value="12">12 (Bulanan)</option>
+            </select>
+          </div>
+          <div class="input-group"><label>Tempoh Simpanan, t (Tahun):</label><input type="number" id="c-t" value="3"></div>
+        `;
+      } else if (type === 'roi') {
+        f.innerHTML = `
+          <div class="input-group"><label>Jumlah Pulangan Bersih (RM):</label><input type="number" id="c-return" value="350"></div>
+          <div class="input-group"><label>Nilai Pelaburan Asal (RM):</label><input type="number" id="c-capital" value="2000"></div>
+        `;
+      } else if (type === 'simple') {
+        f.innerHTML = `
+          <div class="input-group"><label>Prinsipal Pinjaman, P (RM):</label><input type="number" id="c-sp" value="5000"></div>
+          <div class="input-group"><label>Kadar Faedah Sama Rata, r (%):</label><input type="number" id="c-sr" value="4" step="0.1"></div>
+          <div class="input-group"><label>Tempoh Pinjaman, t (Tahun):</label><input type="number" id="c-st" value="2"></div>
+        `;
+      }
+    }
+
+    function calculateFormula() {
+      const type = document.getElementById('calc-type').value;
+      const res = document.getElementById('calc-result');
+      res.style.display = 'block';
+      if (type === 'compound') {
+        const P = parseFloat(document.getElementById('c-p').value) || 0;
+        const r = (parseFloat(document.getElementById('c-r').value) || 0) / 100;
+        const n = parseInt(document.getElementById('c-n').value) || 1;
+        const t = parseFloat(document.getElementById('c-t').value) || 0;
+        const mv = P * Math.pow((1 + (r / n)), (n * t));
+        const interest = mv - P;
+        res.innerHTML = `Nilai Matang (MV): <strong>RM ${mv.toFixed(2)}</strong><br><small style="color: #047857;">Faedah Terkumpul: RM ${interest.toFixed(2)}</small>`;
+      } else if (type === 'roi') {
+        const ret = parseFloat(document.getElementById('c-return').value) || 0;
+        const cap = parseFloat(document.getElementById('c-capital').value) || 1;
+        const roi = (ret / cap) * 100;
+        res.innerHTML = `Nilai Pulangan Pelaburan (ROI): <strong>${roi.toFixed(2)}%</strong>`;
+      } else if (type === 'simple') {
+        const P = parseFloat(document.getElementById('c-sp').value) || 0;
+        const r = (parseFloat(document.getElementById('c-sr').value) || 0) / 100;
+        const t = parseFloat(document.getElementById('c-st').value) || 0;
+        const I = P * r * t;
+        const A = P + I;
+        const monthly = A / (t * 12);
+        res.innerHTML = `Jumlah Faedah: <strong>RM ${I.toFixed(2)}</strong><br>Jumlah Bayaran Balik: <strong>RM ${A.toFixed(2)}</strong><br>Ansuran Bulanan: <strong>RM ${monthly.toFixed(2)}/bln</strong>`;
+      }
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+      for (let i = 0; i < 70; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.8) * 14,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+      let frame = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.3;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        frame++;
+        if (frame < 80) requestAnimationFrame(render);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      render();
+    }
+  </script>
+</body>
+</html>

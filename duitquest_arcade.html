@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DuitQuest Arcade: Cabaran Jutawan Matematik T3</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --card-bg: #151D30;
+      --primary: #3B82F6;
+      --primary-glow: rgba(59, 130, 246, 0.5);
+      --gold: #F59E0B;
+      --green: #10B981;
+      --red: #EF4444;
+      --purple: #8B5CF6;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #24324D;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    .wrapper { width: 100%; max-width: 860px; margin: 0 auto; }
+    
+    /* Top Bar */
+    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .logo { font-size: 1.25rem; font-weight: 800; color: #60A5FA; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+    .badge-round { background: rgba(59, 130, 246, 0.15); border: 1px solid var(--primary); color: #93C5FD; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+    /* Player Roster Ribbon */
+    .roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .roster-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; transition: all 0.25s ease; }
+    .roster-card.active { border-color: #60A5FA; box-shadow: 0 0 16px var(--primary-glow); transform: translateY(-2px); background: #1B253F; }
+    .roster-avatar { font-size: 1.6rem; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; }
+    .roster-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .roster-stats { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 6px; margin-top: 2px; }
+
+    /* Panels & Cards */
+    .panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-weight: 700; font-size: 0.95rem; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .btn-green { background: linear-gradient(135deg, #059669, #047857); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+    /* Quiz Stage */
+    .quiz-tag { display: inline-block; padding: 4px 10px; background: rgba(59, 130, 246, 0.15); color: #93C5FD; border-radius: 6px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+    .quiz-question { font-size: 1.15rem; font-weight: 700; line-height: 1.45; margin-bottom: 18px; color: #FFFFFF; }
+    .quiz-options { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media(min-width: 600px) { .quiz-options { grid-template-columns: 1fr 1fr; } }
+    .opt-card { background: rgba(255,255,255,0.03); border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; color: var(--text); font-size: 0.95rem; font-weight: 600; }
+    .opt-card:hover:not(:disabled) { border-color: var(--primary); background: rgba(59, 130, 246, 0.08); transform: translateY(-1px); }
+    .opt-card.correct { border-color: var(--green) !important; background: rgba(16, 185, 129, 0.15) !important; color: #6EE7B7 !important; }
+    .opt-card.wrong { border-color: var(--red) !important; background: rgba(239, 68, 68, 0.15) !important; color: #FCA5A5 !important; }
+    .opt-badge { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .feedback-box { display: none; margin-top: 16px; padding: 14px 18px; border-radius: 12px; font-size: 0.92rem; line-height: 1.45; }
+
+    /* Action Video Game Canvas Stage */
+    #canvas-container { position: relative; width: 100%; border-radius: var(--radius); overflow: hidden; border: 2px solid var(--border); background: #0A0E1A; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    canvas { display: block; width: 100%; height: 380px; background: #0A0E1A; }
+    .hud-bar { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+    .hud-chip { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.12); padding: 5px 12px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; }
+    
+    .game-overlay { position: absolute; inset: 0; background: rgba(11, 15, 25, 0.9); backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 10; }
+    .game-overlay h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+    .game-overlay p { color: var(--text-muted); font-size: 0.95rem; max-width: 440px; margin-bottom: 20px; line-height: 1.4; }
+
+    /* On-Screen Mobile Joystick Controls */
+    .virtual-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 6px 10px; }
+    .d-pad { display: flex; gap: 8px; }
+    .v-btn { width: 54px; height: 54px; border-radius: 50%; background: var(--card-bg); border: 2px solid var(--border); color: white; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: 0.1s; }
+    .v-btn:active { background: var(--primary); transform: scale(0.92); }
+    .v-btn-jump { width: 70px; height: 54px; border-radius: 27px; background: linear-gradient(135deg, #3B82F6, #1D4ED8); font-size: 0.95rem; font-weight: 800; }
+
+    /* Podium Leaderboard */
+    .podium-box { text-align: center; padding: 28px 16px; }
+    .podium-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1.5px solid var(--border); margin-bottom: 10px; font-size: 0.95rem; }
+    .podium-row.winner-gold { background: rgba(245, 158, 11, 0.12); border-color: var(--gold); }
+    .rank-text { font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; font-weight: 800; color: #60A5FA; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div class="logo">
+        <span>⚡</span> DuitQuest Video Game
+      </div>
+      <div class="badge-round" id="lbl-round-progress">
+        Pusingan 1 / 5
+      </div>
+    </header>
+
+    <!-- Players Ribbon -->
+    <div class="roster-grid" id="roster-container"></div>
+
+    <!-- Screen 1: Registration -->
+    <div id="screen-reg" class="panel">
+      <h2 style="font-size: 1.4rem; font-weight: 800; color: #60A5FA; margin-bottom: 6px;">🎮 Pendaftaran Pemain</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 18px;">
+        Sebelum memulakan video game, setiap pemain mesti menjawab <strong>1 soalan matematik</strong>. 
+        Jawapan betul menjana <strong>lebih banyak Wang & Tenaga</strong>! Melepasi pintu portal di hujung tahap aksi untuk naik ke tahap seterusnya!
+      </p>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">Pilih Mod Pemain:</label>
+        <select id="select-players-count" onchange="buildPlayerInputs()" style="width: 100%; padding: 10px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; color: white; font-weight: 600;">
+          <option value="1">1 Pemain (Solo Hero Quest)</option>
+          <option value="2" selected>2 Pemain (Bergilir / Pass & Play)</option>
+          <option value="3">3 Pemain (Bergilir)</option>
+          <option value="4">4 Pemain (Bergilir)</option>
+        </select>
+      </div>
+
+      <div id="player-inputs-list" style="display: grid; gap: 10px; margin-bottom: 22px;"></div>
+
+      <button class="btn btn-primary" style="width: 100%; padding: 14px;" onclick="initGameSession()">
+        🚀 Mulakan Pengembaraan Video Game!
+      </button>
+    </div>
+
+    <!-- Screen 2: Math Gate (1 Question Mandatory) -->
+    <div id="screen-gate" class="panel" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="quiz-tag" id="q-topic-badge">Matematik Pengguna T3</span>
+        <span id="q-turn-announcer" style="font-weight: 800; color: #93C5FD; font-size: 0.95rem;">Giliran: Amir</span>
+      </div>
+      <div class="quiz-question" id="q-title-text">Memuatkan soalan matematik...</div>
+
+      <div class="quiz-options" id="q-options-grid"></div>
+
+      <div class="feedback-box" id="q-feedback"></div>
+
+      <div style="margin-top: 18px; text-align: right;">
+        <button class="btn btn-primary" id="btn-start-arcade" style="display: none;" onclick="launchArcadeLevel()">
+          🕹️ Masuk Cabaran Aksi Tahap <span id="lbl-target-stage">1</span> &rarr;
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Video Game Action Canvas Stage -->
+    <div id="screen-arcade" style="display: none;">
+      <div id="canvas-container">
+        <div class="hud-bar">
+          <div class="hud-chip">🏆 TAHAP: <span id="hud-val-level" style="color: #60A5FA;">1</span></div>
+          <div class="hud-chip">⚡ TENAGA: <span id="hud-val-energy" style="color: #34D399;">100</span>%</div>
+          <div class="hud-chip">💰 WANG: RM <span id="hud-val-money" style="color: #FBBF24;">500</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="380"></canvas>
+
+        <div class="game-overlay" id="overlay-result">
+          <h2 id="overlay-headline">Tahap Selesai!</h2>
+          <p id="overlay-body">Penerangan aksi...</p>
+          <button class="btn btn-green" id="btn-continue-turn" onclick="commitStageResult()">Selesaikan Giliran</button>
+        </div>
+      </div>
+
+      <!-- Controls Guidance & Touch Buttons -->
+      <div class="virtual-controls">
+        <div class="d-pad">
+          <button class="v-btn" onmousedown="setKey(37, true)" onmouseup="setKey(37, false)" ontouchstart="setKey(37, true)" ontouchend="setKey(37, false)">◀</button>
+          <button class="v-btn" onmousedown="setKey(39, true)" onmouseup="setKey(39, false)" ontouchstart="setKey(39, true)" ontouchend="setKey(39, false)">▶</button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+          Gunakan <strong>&larr; &rarr;</strong> & <strong>Space</strong> / Butang Sentuh.<br>Kutip syiling & lompat masuk <strong>Portal Biru</strong>!
+        </div>
+        <div>
+          <button class="v-btn v-btn-jump" onmousedown="setKey(38, true)" onmouseup="setKey(38, false)" ontouchstart="setKey(38, true)" ontouchend="setKey(38, false)">LOMPAT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Final Winner Podium -->
+    <div id="screen-winner" class="panel podium-box" style="display: none;">
+      <h2 style="font-size: 1.8rem; font-weight: 800; color: #F59E0B; margin-bottom: 6px;">🏆 Keputusan Akhir Jutawan DuitQuest!</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 22px;">
+        Pemenang dinilai mengikut hierarki: <strong>Tahap Tertinggi &rarr; Tenaga Terbanyak &rarr; Wang Terbanyak</strong>.
+      </p>
+
+      <div id="podium-entries" style="display: grid; gap: 10px; max-width: 650px; margin: 0 auto 24px;"></div>
+
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Mulakan Sesi Permainan Baharu</button>
+    </div>
+  </div>
+
+  <script>
+    // Audio synthesizer using Web Audio API
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type='sine', dur=0.1) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    }
+    const sndJump = () => playTone(320, 'square', 0.12);
+    const sndCoin = () => { playTone(987, 'sine', 0.08); setTimeout(()=>playTone(1318, 'sine', 0.12), 60); };
+    const sndHit = () => { playTone(120, 'sawtooth', 0.18); };
+    const sndWin = () => { playTone(523, 'triangle', 0.1); setTimeout(()=>playTone(659,'triangle',0.1),100); setTimeout(()=>playTone(784,'triangle',0.25),200); };
+    const sndLose = () => { playTone(240, 'sawtooth', 0.2); setTimeout(()=>playTone(180,'sawtooth',0.3),150); };
+
+    // Mathematics Form 3 Question Bank
+    const mathQuestionBank = [
+      {
+        topic: "Faedah Kompaun (MV)",
+        q: "Simpanan RM4,000 dengan kadar faedah 6% setahun dikompaunkan setiap suku tahun. Apakah nilai n (kekerapan pengkompaunan) dalam setahun?",
+        options: ["n = 1", "n = 2", "n = 4", "n = 12"],
+        correct: 2,
+        explain: "Suku tahun bermaksud 4 kali setahun (12 bulan ÷ 3 bulan = 4 kali). Maka n = 4."
+      },
+      {
+        topic: "Faedah Mudah (I = Prt)",
+        q: "Encik Ramli menyimpan RM3,000 selama 2 tahun pada kadar faedah mudah 5% setahun. Berapakah jumlah faedah yang diterima?",
+        options: ["RM150", "RM300", "RM600", "RM3,300"],
+        correct: 1,
+        explain: "Faedah I = Prt = RM3,000 × 0.05 × 2 = RM300."
+      },
+      {
+        topic: "Pulangan Pelaburan (ROI)",
+        q: "Aina melabur RM2,000 dalam saham dan menerima dividen RM100 serta keuntungan modal RM300. Berapakah nilai ROI beliau?",
+        options: ["10%", "15%", "20%", "25%"],
+        correct: 2,
+        explain: "Jumlah Pulangan = RM100 + RM300 = RM400. ROI = (RM400 / RM2,000) × 100% = 20%!"
+      },
+      {
+        topic: "Kad Kredit: Bayaran Minimum",
+        q: "Penyata kad kredit menunjukkan baki semasa RM1,600. Berdasarkan syarat 5% atau RM50 (yang mana lebih tinggi), berapakah bayaran minimum?",
+        options: ["RM50", "RM80", "RM100", "RM160"],
+        correct: 1,
+        explain: "5% daripada RM1,600 = 0.05 × 1600 = RM80. Oleh sebab RM80 > RM50, bayaran minimum ialah RM80."
+      },
+      {
+        topic: "Pinjaman Faedah Sama Rata",
+        q: "Pinjaman peribadi RM10,000 berkadar faedah sama rata 4% setahun selama 2 tahun. Berapakah jumlah bayaran balik pinjaman (A = P + Prt)?",
+        options: ["RM800", "RM10,400", "RM10,800", "RM11,200"],
+        correct: 2,
+        explain: "Faedah = 10000 × 0.04 × 2 = RM800. Jumlah bayaran balik A = RM10,000 + RM800 = RM10,800."
+      },
+      {
+        topic: "Pelaburan: Tahap Risiko",
+        q: "Antara instrumen simpanan berikut, yang manakah mempunyai kecairan paling rendah?",
+        options: ["Akaun Simpanan Tetap", "Saham Syarikat", "Hartanah Kediaman", "Akaun Simpanan Biasa"],
+        correct: 2,
+        explain: "Hartanah mempunyai kecairan paling rendah kerana mengambil masa berbulan-bulan untuk dijual dan ditukar kepada tunai."
+      }
+    ];
+
+    // Player state & session
+    const avatarList = ['🦊', '🚀', '⚡', '🤖'];
+    const nameList = ['Amir', 'Sarah', 'Dinesh', 'Mei Ling'];
+    let players = [];
+    let activePlayerIdx = 0;
+    let roundNum = 1;
+    const totalRounds = 5;
+    let currentQuiz = null;
+
+    function buildPlayerInputs() {
+      const count = parseInt(document.getElementById('select-players-count').value);
+      const container = document.getElementById('player-inputs-list');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        container.innerHTML += `
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 1.5rem;">${avatarList[i]}</span>
+            <input type="text" id="p-name-${i}" value="${nameList[i]}" placeholder="Nama Pemain ${i+1}" style="flex:1; padding: 10px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; color: white; font-weight: 700;">
+          </div>
+        `;
+      }
+    }
+    buildPlayerInputs();
+
+    function initGameSession() {
+      const count = parseInt(document.getElementById('select-players-count').value);
+      players = [];
+      for (let i = 0; i < count; i++) {
+        const pName = document.getElementById(`p-name-${i}`).value.trim() || `Pemain ${i+1}`;
+        players.push({
+          id: i,
+          name: pName,
+          avatar: avatarList[i],
+          level: 1,
+          energy: 100,
+          money: 500,
+          answered: 0,
+          correct: 0
+        });
+      }
+      activePlayerIdx = 0;
+      roundNum = 1;
+      document.getElementById('screen-reg').style.display = 'none';
+      renderRoster();
+      startPlayerTurn();
+    }
+
+    function renderRoster() {
+      const roster = document.getElementById('roster-container');
+      roster.innerHTML = '';
+      players.forEach((p, idx) => {
+        const isCurrent = idx === activePlayerIdx;
+        roster.innerHTML += `
+          <div class="roster-card ${isCurrent ? 'active' : ''}">
+            <div class="roster-avatar">${p.avatar}</div>
+            <div style="flex: 1; overflow: hidden;">
+              <div class="roster-name">${p.name} ${isCurrent ? '⭐' : ''}</div>
+              <div class="roster-stats">
+                <span style="color:#60A5FA;">T:${p.level}</span>
+                <span style="color:#34D399;">⚡${p.energy}%</span>
+                <span style="color:#FBBF24;">RM${p.money}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('lbl-round-progress').innerText = `Pusingan ${roundNum} / ${totalRounds}`;
+    }
+
+    function startPlayerTurn() {
+      renderRoster();
+      const p = players[activePlayerIdx];
+
+      document.getElementById('screen-arcade').style.display = 'none';
+      document.getElementById('screen-gate').style.display = 'block';
+
+      document.getElementById('q-turn-announcer').innerText = `Giliran: ${p.avatar} ${p.name}`;
+      document.getElementById('btn-start-arcade').style.display = 'none';
+      document.getElementById('q-feedback').style.display = 'none';
+
+      // Load 1 Math Question
+      currentQuiz = mathQuestionBank[Math.floor(Math.random() * mathQuestionBank.length)];
+      document.getElementById('q-topic-badge').innerText = currentQuiz.topic;
+      document.getElementById('q-title-text').innerText = currentQuiz.q;
+
+      const optGrid = document.getElementById('q-options-grid');
+      optGrid.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+      currentQuiz.options.forEach((optText, oIdx) => {
+        optGrid.innerHTML += `
+          <button class="opt-card" onclick="processAnswer(${oIdx}, this)">
+            <span class="opt-badge">${letters[oIdx]}</span>
+            <span>${optText}</span>
+          </button>
+        `;
+      });
+    }
+
+    function processAnswer(selectedIdx, btnElem) {
+      const p = players[activePlayerIdx];
+      const allBtns = document.querySelectorAll('.opt-card');
+      allBtns.forEach(b => b.disabled = true);
+
+      const isRight = selectedIdx === currentQuiz.correct;
+      p.answered++;
+
+      const fBox = document.getElementById('q-feedback');
+      fBox.style.display = 'block';
+
+      // Rule: "The answer can be wrong but correct answers get more money or energy."
+      if (isRight) {
+        btnElem.classList.add('correct');
+        sndWin();
+        p.correct++;
+        const gainMoney = 250;
+        const gainEnergy = 40;
+        p.money += gainMoney;
+        p.energy = Math.min(100, p.energy + gainEnergy);
+
+        fBox.style.background = 'rgba(16, 185, 129, 0.15)';
+        fBox.style.border = '1px solid #10B981';
+        fBox.style.color = '#6EE7B7';
+        fBox.innerHTML = `
+          <strong>🎉 TAHNIAH! Jawapan Tepat!</strong><br>
+          Ganjaran Penuh: <strong>+RM${gainMoney}</strong> & <strong>+${gainEnergy}% Tenaga</strong>!<br>
+          <small style="color:#A7F3D0;">${currentQuiz.explain}</small>
+        `;
+      } else {
+        btnElem.classList.add('wrong');
+        allBtns[currentQuiz.correct].classList.add('correct');
+        sndLose();
+        const baseMoney = 30;
+        const baseEnergy = 10;
+        p.money += baseMoney;
+        p.energy = Math.min(100, p.energy + baseEnergy);
+
+        fBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        fBox.style.border = '1px solid #EF4444';
+        fBox.style.color = '#FCA5A5';
+        fBox.innerHTML = `
+          <strong>Jawapan Kurang Tepat, Tetapi Permainan Diteruskan!</strong><br>
+          Ganjaran Asas: <strong>+RM${baseMoney}</strong> & <strong>+${baseEnergy}% Tenaga</strong> (Jawapan betul dapat lebih!).<br>
+          <strong>Penjelasan:</strong> ${currentQuiz.explain}
+        `;
+      }
+
+      renderRoster();
+      document.getElementById('lbl-target-stage').innerText = p.level;
+      document.getElementById('btn-start-arcade').style.display = 'inline-flex';
+    }
+
+    function launchArcadeLevel() {
+      document.getElementById('screen-gate').style.display = 'none';
+      document.getElementById('screen-arcade').style.display = 'block';
+      startVideoGameChallenge();
+    }
+
+    // -----------------------------------------------------------------
+    // VIDEO GAME ENGINE: Platformer & Obstacle Challenge
+    // -----------------------------------------------------------------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let loopId = null;
+    let keysDown = {};
+    let isStageComplete = false;
+
+    function setKey(keyCode, isPressed) {
+      keysDown[keyCode] = isPressed;
+    }
+    window.addEventListener('keydown', e => { keysDown[e.keyCode] = true; });
+    window.addEventListener('keyup', e => { keysDown[e.keyCode] = false; });
+
+    // Platform, Player, Traps, Coins & Portal State
+    let player = {
+      x: 40,
+      y: 280,
+      w: 26,
+      h: 30,
+      vx: 0,
+      vy: 0,
+      speed: 3.8,
+      jumpForce: -9.5,
+      grounded: false
+    };
+
+    let gravity = 0.45;
+    let platforms = [];
+    let hazards = [];
+    let pickups = [];
+    let exitPortal = { x: 730, y: 150, w: 32, h: 48, pulse: 0 };
+
+    function startVideoGameChallenge() {
+      const p = players[activePlayerIdx];
+      isStageComplete = false;
+      document.getElementById('overlay-result').style.display = 'none';
+      document.getElementById('hud-val-level').innerText = p.level;
+      document.getElementById('hud-val-energy').innerText = p.energy;
+      document.getElementById('hud-val-money').innerText = p.money;
+
+      // Reset Player
+      player.x = 40;
+      player.y = 280;
+      player.vx = 0;
+      player.vy = 0;
+      player.grounded = false;
+
+      // Build Level Layout according to player's current level
+      buildLevelLayout(p.level);
+
+      if (loopId) cancelAnimationFrame(loopId);
+      runGameLoop();
+    }
+
+    function buildLevelLayout(lvl) {
+      // Base ground platform
+      platforms = [
+        { x: 0, y: 340, w: 800, h: 40 } // Ground
+      ];
+
+      // Procedural floating platforms based on level
+      if (lvl === 1) {
+        platforms.push({ x: 180, y: 260, w: 120, h: 16 });
+        platforms.push({ x: 380, y: 200, w: 130, h: 16 });
+        platforms.push({ x: 590, y: 180, w: 120, h: 16 });
+        exitPortal.x = 640;
+        exitPortal.y = 124;
+      } else if (lvl === 2) {
+        platforms.push({ x: 140, y: 270, w: 100, h: 16 });
+        platforms.push({ x: 300, y: 210, w: 90, h: 16 });
+        platforms.push({ x: 460, y: 160, w: 90, h: 16 });
+        platforms.push({ x: 620, y: 120, w: 110, h: 16 });
+        exitPortal.x = 660;
+        exitPortal.y = 64;
+      } else {
+        // High levels (3, 4, 5+): narrower platforms, higher climbs
+        platforms.push({ x: 120, y: 270, w: 80, h: 16 });
+        platforms.push({ x: 260, y: 210, w: 80, h: 16 });
+        platforms.push({ x: 400, y: 160, w: 80, h: 16 });
+        platforms.push({ x: 540, y: 120, w: 80, h: 16 });
+        platforms.push({ x: 670, y: 90, w: 90, h: 16 });
+        exitPortal.x = 700;
+        exitPortal.y = 34;
+      }
+
+      // Hazards: Moving laser drones / spike traps
+      hazards = [];
+      const numHazards = Math.min(6, 1 + lvl);
+      const hazardSpeed = 1.2 + lvl * 0.4;
+      for (let i = 0; i < numHazards; i++) {
+        hazards.push({
+          x: 200 + i * 110,
+          y: 316,
+          w: 22,
+          h: 24,
+          vy: (i % 2 === 0 ? 1 : -1) * hazardSpeed,
+          minY: 100,
+          maxY: 316,
+          color: '#EF4444'
+        });
+      }
+
+      // Collectible Money Coins
+      pickups = [];
+      for (let i = 0; i < 5; i++) {
+        pickups.push({
+          x: 150 + i * 115,
+          y: 120 + Math.random() * 120,
+          r: 9,
+          val: 50,
+          taken: false
+        });
+      }
+    }
+
+    function runGameLoop() {
+      updateGamePhysics();
+      renderGameCanvas();
+      if (!isStageComplete) {
+        loopId = requestAnimationFrame(runGameLoop);
+      }
+    }
+
+    function updateGamePhysics() {
+      const p = players[activePlayerIdx];
+
+      // Left / Right Movement
+      if (keysDown[37] || keysDown[65]) player.vx = -player.speed;
+      else if (keysDown[39] || keysDown[68]) player.vx = player.speed;
+      else player.vx = 0;
+
+      // Jump Movement (Up Arrow / W / Space)
+      if ((keysDown[38] || keysDown[87] || keysDown[32]) && player.grounded) {
+        player.vy = player.jumpForce;
+        player.grounded = false;
+        sndJump();
+      }
+
+      // Apply Gravity
+      player.vy += gravity;
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Clamp Screen Boundaries
+      if (player.x < 10) player.x = 10;
+      if (player.x > canvas.width - player.w - 10) player.x = canvas.width - player.w - 10;
+
+      // Platform Collisions (AABB)
+      player.grounded = false;
+      platforms.forEach(plat => {
+        if (
+          player.x + player.w > plat.x &&
+          player.x < plat.x + plat.w &&
+          player.y + player.h >= plat.y &&
+          player.y + player.h <= plat.y + 14 &&
+          player.vy >= 0
+        ) {
+          player.y = plat.y - player.h;
+          player.vy = 0;
+          player.grounded = true;
+        }
+      });
+
+      // Update & Test Hazards
+      hazards.forEach(h => {
+        h.y += h.vy;
+        if (h.y < h.minY || h.y > h.maxY) h.vy *= -1;
+
+        // Collision with player
+        if (
+          player.x < h.x + h.w &&
+          player.x + player.w > h.x &&
+          player.y < h.y + h.h &&
+          player.y + player.h > h.y
+        ) {
+          sndHit();
+          p.energy = Math.max(0, p.energy - 3);
+          document.getElementById('hud-val-energy').innerText = p.energy;
+          player.vx = -8; // Knockback
+          player.vy = -4;
+
+          if (p.energy <= 0) {
+            failVideoStage("Tenaga Kehabisan!", "Tenaga anda merosot ke 0 akibat terkena halangan. Anda kekal di tahap ini untuk giliran seterusnya.");
+          }
+        }
+      });
+
+      // Collect Pickups
+      pickups.forEach(coin => {
+        if (!coin.taken) {
+          const dx = (player.x + player.w/2) - coin.x;
+          const dy = (player.y + player.h/2) - coin.y;
+          if (Math.sqrt(dx*dx + dy*dy) < player.w/2 + coin.r) {
+            coin.taken = true;
+            sndCoin();
+            p.money += coin.val;
+            p.energy = Math.min(100, p.energy + 5);
+            document.getElementById('hud-val-money').innerText = p.money;
+            document.getElementById('hud-val-energy').innerText = p.energy;
+          }
+        }
+      });
+
+      // Reach Exit Portal to Pass to Next Level!
+      if (
+        player.x < exitPortal.x + exitPortal.w &&
+        player.x + player.w > exitPortal.x &&
+        player.y < exitPortal.y + exitPortal.h &&
+        player.y + player.h > exitPortal.y
+      ) {
+        passVideoStage();
+      }
+    }
+
+    function renderGameCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Sci-fi Backdrop Grid
+      ctx.strokeStyle = 'rgba(36, 50, 77, 0.4)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Draw Platforms
+      platforms.forEach((plat, i) => {
+        ctx.fillStyle = i === 0 ? '#1E293B' : '#2563EB';
+        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+        ctx.strokeStyle = i === 0 ? '#334155' : '#60A5FA';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+      });
+
+      // Draw Exit Portal (Destination)
+      exitPortal.pulse += 0.08;
+      const glow = Math.sin(exitPortal.pulse) * 6;
+      ctx.save();
+      ctx.shadowColor = '#60A5FA';
+      ctx.shadowBlur = 14 + glow;
+      ctx.fillStyle = '#3B82F6';
+      ctx.fillRect(exitPortal.x, exitPortal.y, exitPortal.w, exitPortal.h);
+      ctx.restore();
+      ctx.font = '22px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('🌀', exitPortal.x + exitPortal.w/2, exitPortal.y + exitPortal.h/2 + 7);
+
+      // Draw Pickups (Coins)
+      pickups.forEach(c => {
+        if (!c.taken) {
+          ctx.save();
+          ctx.shadowColor = '#FBBF24';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+          ctx.fillStyle = '#F59E0B';
+          ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = '#78350F';
+          ctx.font = 'bold 10px JetBrains Mono';
+          ctx.textAlign = 'center';
+          ctx.fillText('$', c.x, c.y + 3);
+        }
+      });
+
+      // Draw Hazards (Red Energy Drones)
+      hazards.forEach(h => {
+        ctx.save();
+        ctx.shadowColor = '#EF4444';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#DC2626';
+        ctx.fillRect(h.x, h.y, h.w, h.h);
+        ctx.restore();
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('👾', h.x + h.w/2, h.y + h.h/2 + 5);
+      });
+
+      // Draw Player Hero Character
+      const p = players[activePlayerIdx];
+      ctx.save();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(player.x + player.w/2, player.y + player.h/2, player.w/2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#60A5FA';
+      ctx.stroke();
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.avatar, player.x + player.w/2, player.y + player.h/2 + 6);
+      ctx.restore();
+    }
+
+    function passVideoStage() {
+      isStageComplete = true;
+      sndWin();
+      const p = players[activePlayerIdx];
+      p.level += 1; // Overcame simple challenge -> Advance to NEXT LEVEL!
+      const levelPrize = p.level * 150;
+      p.money += levelPrize;
+
+      document.getElementById('overlay-headline').innerText = `🎉 Berjaya Mara ke Tahap ${p.level}!`;
+      document.getElementById('overlay-body').innerHTML = `
+        Tahniah ${p.name}! Anda berjaya melepasi cabaran platform dan memasuki portal.<br>
+        Ganjaran Kenaikan Tahap: <strong>+RM${levelPrize}</strong>!
+      `;
+      document.getElementById('overlay-result').style.display = 'flex';
+    }
+
+    function failVideoStage(title, msg) {
+      isStageComplete = true;
+      sndLose();
+      document.getElementById('overlay-headline').innerText = `⚠️ ${title}`;
+      document.getElementById('overlay-body').innerText = msg;
+      document.getElementById('overlay-result').style.display = 'flex';
+    }
+
+    function commitStageResult() {
+      document.getElementById('screen-arcade').style.display = 'none';
+      advanceTurn();
+    }
+
+    function advanceTurn() {
+      activePlayerIdx++;
+      if (activePlayerIdx >= players.length) {
+        activePlayerIdx = 0;
+        roundNum++;
+      }
+
+      if (roundNum > totalRounds) {
+        declareWinners();
+      } else {
+        startPlayerTurn();
+      }
+    }
+
+    function declareWinners() {
+      document.getElementById('screen-gate').style.display = 'none';
+      document.getElementById('screen-arcade').style.display = 'none';
+      document.getElementById('screen-winner').style.display = 'block';
+
+      // WINNING RULE:
+      // "The player who has reached the highest level then the most energy or money wins"
+      players.sort((a, b) => {
+        if (b.level !== a.level) return b.level - a.level;     // 1. Highest level first
+        if (b.energy !== a.energy) return b.energy - a.energy; // 2. Most energy
+        return b.money - a.money;                              // 3. Most money
+      });
+
+      const container = document.getElementById('podium-entries');
+      container.innerHTML = '';
+      const trophies = ['👑 JUARA UTAMA', '🥈 NAIB JUARA', '🥉 TEMPAT KE-3', '🎖️ PENYERTAAN'];
+
+      players.forEach((p, idx) => {
+        const isChamp = idx === 0;
+        container.innerHTML += `
+          <div class="podium-row ${isChamp ? 'winner-gold' : ''}">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:1.8rem;">${p.avatar}</span>
+              <div style="text-align:left;">
+                <div style="font-weight:800; font-size:1.05rem; color:${isChamp ? '#F59E0B' : 'white'};">${trophies[idx]}: ${p.name}</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Soalan Kuiz: ${p.correct}/${p.answered} Tepat</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="rank-text">Tahap ${p.level}</div>
+              <div style="font-size:0.8rem; font-family:'JetBrains Mono'; color:#34D399;">⚡${p.energy}% | RM${p.money.toLocaleString()}</div>
+            </div>
+          </div>
+        `;
+      });
+      sndWin();
+    }
+  </script>
+</body>
+</html>
